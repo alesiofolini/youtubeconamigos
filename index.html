@@ -52,8 +52,31 @@
 		var database = firebase.database();
 		
 		var listaRef = database.ref('lista');
-		listaRef.on('value', function(snapshot) {
-			console.log("Alesio");
+		listaRef.on('child_added', function(snapshot) {
+			var tema = new Object();
+			tema.id = snapshot.key;
+			tema.idYoutube = snapshot.val().id;
+			tema.nombre = snapshot.val().nombre;
+			agregaralista(tema);
+		});
+		
+		listaRef.on('child_removed', function(snapshot) {
+			lista.shift();
+			// Create the list element:
+			var ul = document.createElement('ul');
+			
+			for(var i = 0; i < lista.length; i++) {
+				// Create the list item:
+				var item = document.createElement('li');
+			
+				// Set its contents:
+				item.appendChild(document.createTextNode(lista[i].nombre));
+			
+				// Add it to the list:
+				ul.appendChild(item);
+			}
+			document.getElementById('lista').innerHTML = '';
+			document.getElementById('lista').appendChild(ul);
 		});
 		
 		// 2. This code loads the IFrame Player API code asynchronously.
@@ -119,23 +142,8 @@
 		function siguiente(){
 			//player.nextVideo();
 			if(lista.length > 0){
-				player.loadVideoById(lista[0].id,0,"large");
-				lista.shift();
-				// Create the list element:
-				var ul = document.createElement('ul');
-			
-				for(var i = 0; i < lista.length; i++) {
-					// Create the list item:
-					var item = document.createElement('li');
-			
-					// Set its contents:
-					item.appendChild(document.createTextNode(lista[i]));
-			
-					// Add it to the list:
-					ul.appendChild(item);
-				}
-				document.getElementById('lista').innerHTML = '';
-				document.getElementById('lista').appendChild(ul);
+				player.loadVideoById(lista[0].idYoutube,0,"large");
+				listaRef.child(lista[0].id).remove();
 			}
 		}
 		  
@@ -173,11 +181,15 @@
 			xhttp.open("GET", request, true);
 			xhttp.send();
 		}
-		  
+		
 		function agregarbuscado(id, nombre){
 			var tema = new Object();
 			tema.id = id;
 			tema.nombre = nombre;
+			listaRef.push(tema);
+		}
+		  
+		function agregaralista(tema){
 			lista.push(tema);
 			// Create the list element:
 			var ul = document.createElement('ul');
