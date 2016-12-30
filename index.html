@@ -175,15 +175,15 @@
 		}
 		  
 		function play(){
-			playerRef.set({estado : 'play', video : lista[0].idYoutube, tiempo : player.getCurrentTime()});
+			playerRef.set({estado : 'play', video : video.id, tiempo : player.getCurrentTime()});
 		}
 		  
 		function pausa(){
-			playerRef.set({estado : 'pausa', video : lista[0].idYoutube, tiempo : player.getCurrentTime()});
+			playerRef.set({estado : 'pausa', video : video.id, tiempo : player.getCurrentTime()});
 		}
 		  
 		function stop(){
-			playerRef.set({estado : 'stop', video : lista[0].idYoutube, tiempo : 0});
+			playerRef.set({estado : 'stop', video : video.id, tiempo : 0});
 		}
 		  
 		function buscar() {
