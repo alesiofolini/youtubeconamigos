@@ -14,26 +14,33 @@
 	
 </head>
   <body class="container">
-    <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
-	<div class="col-sm-8">
-		<div id="player"></div></br></br>
-		<button class="btn btn-success" onclick="play()"><span class="glyphicon glyphicon-play"></span></button>
-		<button class="btn btn-default" onclick="pausa()"><span class="glyphicon glyphicon-pause"></span></button>
-		<button class="btn btn-danger" onclick="stop()"><span class="glyphicon glyphicon-stop"></span></button>
-		<button class="btn btn-default" onclick="siguiente()"><span class="glyphicon glyphicon-step-forward"></span></button></br></br>
-		<div class="input-group">
-			<input type="text" class="form-control" id="textoBuscar" placeholder="Buscar">
-			<div class="input-group-btn">
-				<button class="btn btn-default" onclick="buscar()">
-					<i class="glyphicon glyphicon-search"></i>
-				</button>
-			</div>
+	<div class="row">
+		<div class="col-sm-6">
+			<button class="btn btn-success" onclick="play()"><span class="glyphicon glyphicon-play"></span></button>
+			<button class="btn btn-default" onclick="pausa()"><span class="glyphicon glyphicon-pause"></span></button>
+			<button class="btn btn-danger" onclick="stop()"><span class="glyphicon glyphicon-stop"></span></button>
+			<button class="btn btn-default" onclick="siguiente()"><span class="glyphicon glyphicon-step-forward"></span></button></br></br>
 		</div>
-		<div id="resultados"></div></br></br>
+		<div class="col-sm-6">
+			Lista
+			<div id="lista"></div>
+		</div>
 	</div>
-	<div class="col-sm-4">
-		Lista
-		<div id="lista"></div>
+	<div class="row">
+		<div class="col-sm-6">
+			<div class="input-group">
+				<input type="text" class="form-control" id="textoBuscar" placeholder="Buscar">
+				<div class="input-group-btn">
+					<button class="btn btn-default" onclick="buscar()">
+						<i class="glyphicon glyphicon-search"></i>
+					</button>
+				</div>
+			</div>
+			<div id="resultados"></div></br></br>
+		</div>
+		<div class="col-sm-6">
+			<div id="player" onclick="play()"></div></br></br>
+		</div>
 	</div>
 	
 	<script src="https://www.gstatic.com/firebasejs/3.6.4/firebase.js"></script>
@@ -50,6 +57,8 @@
 		
 		// Get a reference to the database service
 		var database = firebase.database();
+		
+		var playerRef = database.ref('player');
 		
 		var listaRef = database.ref('lista');
 		listaRef.on('child_added', function(snapshot) {
@@ -79,6 +88,22 @@
 			document.getElementById('lista').appendChild(ul);
 		});
 		
+		var video = {};
+		playerRef.on('value', function(snapshot){
+			video.estado = snapshot.val().estado;
+			video.id = snapshot.val().video;
+			video.tiempo = snapshot.val().tiempo;
+			if(video.estado == 'play'){
+				player.loadVideoById(video.id, video.tiempo);
+			}
+			else if(video.estado == 'stop'){
+				player.stopVideo();
+			}
+			else if(video.estado == 'pausa'){
+				player.pauseVideo();
+			}
+		});
+		
 		// 2. This code loads the IFrame Player API code asynchronously.
 		var tag = document.createElement('script');
 
@@ -93,7 +118,8 @@
 			player = new YT.Player('player', {
 				height: '360',
 				width: '640',
-				videoId: 'R88lUBvbjPo',
+				videoId: video.id,
+				playerVars: { 'color': 'white', 'controls': 0, 'disablekb': 1,  },
 				events: {
 					'onReady': onPlayerReady,
 					'onStateChange': onPlayerStateChange,
@@ -142,21 +168,22 @@
 		function siguiente(){
 			//player.nextVideo();
 			if(lista.length > 0){
-				player.loadVideoById(lista[0].idYoutube,0,"large");
+				//player.loadVideoById(lista[0].idYoutube,0,"large");
+				playerRef.set({estado : 'play', video : lista[0].idYoutube, tiempo : player.getCurrentTime()});
 				listaRef.child(lista[0].id).remove();
 			}
 		}
 		  
 		function play(){
-			player.playVideo();
+			playerRef.set({estado : 'play', video : lista[0].idYoutube, tiempo : player.getCurrentTime()});
 		}
 		  
 		function pausa(){
-			player.pauseVideo();
+			playerRef.set({estado : 'pausa', video : lista[0].idYoutube, tiempo : player.getCurrentTime()});
 		}
 		  
 		function stop(){
-			player.stopVideo();
+			playerRef.set({estado : 'stop', video : lista[0].idYoutube, tiempo : player.getCurrentTime()});
 		}
 		  
 		function buscar() {
