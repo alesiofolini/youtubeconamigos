@@ -169,7 +169,7 @@
 			//player.nextVideo();
 			if(lista.length > 0){
 				//player.loadVideoById(lista[0].idYoutube,0,"large");
-				playerRef.set({estado : 'play', video : lista[0].idYoutube, tiempo : player.getCurrentTime()});
+				playerRef.set({estado : 'play', video : lista[0].idYoutube, tiempo : 0});
 				listaRef.child(lista[0].id).remove();
 			}
 		}
@@ -183,7 +183,7 @@
 		}
 		  
 		function stop(){
-			playerRef.set({estado : 'stop', video : lista[0].idYoutube, tiempo : player.getCurrentTime()});
+			playerRef.set({estado : 'stop', video : lista[0].idYoutube, tiempo : 0});
 		}
 		  
 		function buscar() {
